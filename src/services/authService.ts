@@ -1,16 +1,9 @@
-// src/services/authService.ts
-import axios from 'axios';
+import axios from "axios";
 
-const API = 'http://localhost:5000/api/auth';
+const API_URL = "https://localhost:5140/api/Auth/";
 
-const authService = {
-  loginUser: async (username: string, password: string) => {
-    const res = await axios.post(`${API}/login`, { username, password });
-    return res.data.token;
-  },
-  registerUser: async (username: string, email: string, password: string) => {
-    return axios.post(`${API}/register`, { username, email, password });
-  }
-};
+export const login = (email: string, password: string) =>
+  axios.post(API_URL + "login", null, { params: { email, password } });
 
-export default authService;
+export const register = (email: string, password: string) =>
+  axios.post(API_URL + "register", null, { params: { email, password } });

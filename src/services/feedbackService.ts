@@ -1,37 +1,18 @@
-// src/services/feedbackService.ts
-import axios from 'axios';
-import { getToken } from '../utils/tokenUtils';
+import axios from "axios";
 
-const API = 'http://localhost:5000/api/feedback';
+const API_URL = "https://localhost:5140/api/Feedback/";
 
-const feedbackService = {
-  submitFeedback: async (data: any) => {
-    const token = getToken();
-    const form = new FormData();
-    form.append('category', data.category);
-    form.append('comment', data.comment);
-    if (data.image) form.append('image', data.image);
+export const submitFeedback = (feedback: any, token: string) =>
+  axios.post(API_URL, feedback, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-    return axios.post(`${API}`, form, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-  },
+export const getMyFeedback = (token: string) =>
+  axios.get(API_URL + "my", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-  getMyFeedback: async () => {
-    const token = getToken();
-    const res = await axios.get(`${API}/my-feedback`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return res.data;
-  },
-
-  getAnalytics: async () => {
-    const token = getToken();
-    const res = await axios.get(`http://localhost:5000/api/admin/analytics`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return res.data;
-  }
-};
-
-export default feedbackService;
+export const getAllFeedback = (token: string) =>
+  axios.get(API_URL + "all", {
+    headers: { Authorization: `Bearer ${token}` },
+  });

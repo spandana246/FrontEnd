@@ -1,48 +1,29 @@
-// src/context/AuthContext.tsx
-import React, { createContext, useState, useEffect } from 'react';
-import { getToken, parseToken, removeToken, saveToken } from '../utils/tokenUtils';
-
-interface User {
-  username: string;
-  role: string;
-}
+import React, { createContext, useState, ReactNode } from "react";
 
 interface AuthContextProps {
-  user: User | null;
-  login: (token: string) => void;
-  logout: () => void;
+  token: string | null;
+  setToken: (token: string | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextProps>({
-  user: null,
-  login: () => {},
-  logout: () => {}
+  token: null,
+  setToken: () => {},
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
-  useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const decoded = parseToken(token);
-      setUser({ username: decoded.sub, role: decoded.role });
+  const updateToken = (newToken: string | null) => {
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    } else {
+      localStorage.removeItem("token");
     }
-  }, []);
-
-  const login = (token: string) => {
-    saveToken(token);
-    const decoded = parseToken(token);
-    setUser({ username: decoded.sub, role: decoded.role });
-  };
-
-  const logout = () => {
-    removeToken();
-    setUser(null);
+    setToken(newToken);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ token, setToken: updateToken }}>
       {children}
     </AuthContext.Provider>
   );

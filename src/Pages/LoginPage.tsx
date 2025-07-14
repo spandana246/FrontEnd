@@ -1,36 +1,32 @@
-// src/pages/LoginPage.tsx
-import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import authService from '../services/authService';
+import { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { login } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
-const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
+interface LoginResponse {
+  token: string;
+}
+
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { setToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const token = await authService.loginUser(username, password);
-      login(token);
-      navigate('/feedback');
-    } catch (error) {
-      alert('Invalid credentials');
-    }
+    const res = await login(email, password);
+    const data = res.data as LoginResponse;
+    setToken(data.token);
+    navigate("/feedback");
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input placeholder="Username" onChange={e => setUsername(e.target.value)} required />
-        <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} required />
-        <button type="submit">Login</button>
-      </form>
-    </div>
+      <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button type="submit">Login</button>
+    </form>
   );
-};
-
-export default LoginPage;
+}

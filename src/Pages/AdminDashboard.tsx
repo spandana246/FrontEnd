@@ -1,35 +1,49 @@
-// src/pages/AdminDashboard.tsx
-import React, { useEffect, useState } from 'react';
-import { Pie } from 'react-chartjs-2';
-import feedbackService from '../services/feedbackService';
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { getAllFeedback } from "../services/feedbackService";
+import DashboardCard from "../components/DashboardCard";
+import PieChart from "../components/PieChart";
 
-const AdminDashboard: React.FC = () => {
-  const [analytics, setAnalytics] = useState<any>({});
+interface FeedbackItem {
+  id: number;
+  category: string;
+  text: string;
+  sentiment: string;
+  createdAt: string;
+}
+
+export default function AdminDashboard() {
+  const { token } = useContext(AuthContext);
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      const data = await feedbackService.getAnalytics();
-      setAnalytics(data);
+    const fetch = async () => {
+      const res = await getAllFeedback(token!);
+      setFeedbacks(res.data as FeedbackItem[]);
     };
-    fetchAnalytics();
-  }, []);
+    fetch();
+  }, [token]);
+
+  const categoryCounts: { [key: string]: number } = {};
+  feedbacks.forEach((f) => {
+    categoryCounts[f.category] = (categoryCounts[f.category] || 0) + 1;
+  });
 
   const pieData = {
-    labels: Object.keys(analytics.sentiments || {}),
-    datasets: [{
-      data: Object.values(analytics.sentiments || {}),
-      backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56']
-    }]
+    labels: Object.keys(categoryCounts),
+    datasets: [
+      {
+        data: Object.values(categoryCounts),
+        backgroundColor: ["red", "blue", "green", "orange"],
+      },
+    ],
   };
 
   return (
     <div>
       <h2>Admin Dashboard</h2>
-      <div style={{ width: 300 }}>
-        <Pie data={pieData} />
-      </div>
+      <DashboardCard title="Total Feedback" value={feedbacks.length} />
+      <PieChart data={pieData} />
     </div>
   );
-};
-
-export default AdminDashboard;
+}

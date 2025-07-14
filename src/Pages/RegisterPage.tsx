@@ -1,36 +1,25 @@
-// src/pages/RegisterPage.tsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
+import { useState } from "react";
+import { register } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
-const RegisterPage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function RegisterPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await authService.registerUser(username, email, password);
-      alert('Registration successful');
-      navigate('/login');
-    } catch {
-      alert('Registration failed');
-    }
+    await register(email, password);
+    alert("Registered successfully. Please log in.");
+    navigate("/");
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <input placeholder="Username" onChange={e => setUsername(e.target.value)} required />
-        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} required />
-        <button type="submit">Register</button>
-      </form>
-    </div>
+      <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+      <button type="submit">Register</button>
+    </form>
   );
-};
-
-export default RegisterPage;
+}
